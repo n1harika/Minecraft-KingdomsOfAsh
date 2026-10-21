@@ -1,0 +1,33 @@
+name: KingdomsOfAsh
+version: '${version}'
+main: com.kingdomsofash.KingdomsOfAshPlugin
+api-version: '${apiVersion}'
+description: Oathbreaker, the Lost Forge and the hunt for its wielder.
+authors: [KingdomsOfAsh]
+load: POSTWORLD
+
+commands:
+  ability1:
+    description: Activate the first ability of the weapon in your main hand.
+    usage: /<command>
+    permission: kingdomsofash.use
+  ultimate:
+    description: Activate the ultimate ability of the weapon in your main hand.
+    usage: /<command>
+    permission: kingdomsofash.use
+  oathbreaker:
+    description: Oathbreaker administration, diagnostics and recovery (operators only).
+    usage: /<command> help
+    aliases: [oath, koa]
+    permission: kingdomsofash.admin
+
+permissions:
+  kingdomsofash.use:
+    description: Use weapon abilities (/ability1, /ultimate).
+    default: true
+  kingdomsofash.admin:
+    description: Oathbreaker administration commands.
+    default: op
+  kingdomsofash.bypass.protection:
+    description: Edit the Lost Forge structure despite terrain protection.
+    default: false

@@ -1,0 +1,231 @@
+# ============================================================================================
+#  KINGDOMS OF ASH  -  main configuration
+#  Gameplay defaults below are the design values from the specification. Change them only if
+#  you intentionally want to rebalance the plugin.  Reload with:  /oathbreaker reload
+#  (Structural options such as forge world / arena size only apply to a forge generated AFTER
+#   the change; an existing forge keeps the geometry stored in data/state.json.)
+# ============================================================================================
+
+commands:
+  # Extra labels for the weapon-ability commands, in case /ability1 or /ultimate collide with
+  # another plugin.  The namespaced forms  /kingdomsofash:ability1  and  /kingdomsofash:ultimate
+  # ALWAYS work.  Example:  ability1-aliases: [rupture, oath1]
+  ability1-aliases: []
+  ultimate-aliases: []
+
+# --------------------------------------------------------------------------------------------
+#  Oathbreaker item
+# --------------------------------------------------------------------------------------------
+weapon:
+  material: NETHERITE_SWORD        # vanilla base item (also the no-resource-pack fallback look)
+  attack-damage: 9.0               # added to the player's base 1.0  -> 10 total
+  attack-speed-modifier: -2.6      # base 4.0 -> 1.4 attacks/second (a heavy greatsword)
+  custom-model-string: oathbreaker # custom_model_data string matched by the resource pack
+  integrity-scan-seconds: 120      # cheap sweep of online players' inventories for illegitimate
+                                   # copies (0 = disabled; join / click / use checks still run)
+  missing-checks-before-recovery: 3 # holder online+alive but sword absent this many 5s checks in a row
+                                   # -> automatic, audited recovery (epoch bump, never a duplicate)
+  auto-recover-missing: true
+  combat-log-seconds: 15           # holder who quits within N seconds of being hit by a player drops it
+  drop-on-keep-inventory: true     # keepInventory ignored for the weapon: it always drops on death
+  broadcast-ownership-change: true
+  reveal-drop-coordinates: false   # true = broadcast X/Y/Z when the holder dies
+  dropped-beam: true               # crimson particle pillar over a dropped / unclaimed blade
+
+# --------------------------------------------------------------------------------------------
+#  Blood Oath (passive)
+# --------------------------------------------------------------------------------------------
+blood-oath:
+  hits-per-rage: 2
+  max-rage: 5
+  decay-delay-seconds: 2.5         # no valid hit for this long -> decay begins (first point lost then)
+  decay-interval-seconds: 1.0      # then one Rage per interval
+  # A "valid hit": melee ENTITY_ATTACK by the legitimate holder with Oathbreaker in the main hand,
+  # event not cancelled, final damage > 0 (so fully shield-blocked hits do not count), target is a
+  # living non-armor-stand that is not the attacker; at most once per (attacker,target,tick).
+
+# --------------------------------------------------------------------------------------------
+#  Ability one: Rupture
+# --------------------------------------------------------------------------------------------
+rupture:
+  rage-cost: 2
+  cooldown-seconds: 45
+  width: 6.0
+  range: 3.0
+  vertical-below: 1.5              # blocks below attacker's feet that still count
+  vertical-above: 2.5              # blocks above attacker's feet that still count
+  initial-damage-hearts: 3.0       # true damage
+  bleed-damage-hearts: 1.0
+  bleed-interval-seconds: 2.0
+  bleed-duration-seconds: 8.0
+  require-line-of-sight: true      # the slash does not pass through solid blocks
+  shield-blocks: true
+  respect-team-friendly-fire: true # same scoreboard team with friendly-fire off is never hit
+  ignore-owned-pets: true
+
+# --------------------------------------------------------------------------------------------
+#  Ultimate: Last King's Fury
+# --------------------------------------------------------------------------------------------
+fury:
+  required-rage: 3
+  duration-seconds: 15
+  cooldown-seconds: 150
+  melee-damage-multiplier: 1.25
+  attack-speed-bonus: 0.15
+  move-speed-bonus: 0.10
+  damage-taken-multiplier: 0.90    # applied AFTER armor / enchantment / resistance, before absorption
+  prevent-fall-damage: true
+  end-on-world-change: true
+  exhaustion:
+    duration-seconds: 5
+    melee-damage-multiplier: 0.85
+    move-speed-penalty: 0.10
+  spectral-armor:
+    enabled: true
+    # AUTO   = resource-pack armor for viewers who loaded the pack, vanilla trimmed netherite otherwise
+    # PACK   = always the custom equipment asset (viewers without the pack see nothing)
+    # VANILLA= always black netherite with a crimson trim
+    mode: AUTO
+    show-to-self: false            # experimental: also send the fake armor to the wearer (third-person)
+    viewer-distance: 48
+    refresh-ticks: 10
+
+# --------------------------------------------------------------------------------------------
+#  Bloodiron Ore
+# --------------------------------------------------------------------------------------------
+bloodiron:
+  enabled: true
+  host-block: NETHER_GOLD_ORE      # vanilla block that carries the identity; tracked per-chunk
+  worlds: [world]                  # worlds that receive ore in NEWLY generated chunks
+  required-per-ritual: 64
+  # Diamond-equivalent distribution (Minecraft 1.18+ diamond_ore / large / buried features):
+  generation:
+    min-y: -64                     # world clip: attempts below this are discarded (as vanilla does)
+    max-y: 16
+    virtual-min-y: -144            # triangle spans [virtual-min-y, max-y], peak in the middle (-64) - like diamond_ore
+    small-veins-per-chunk: 7
+    small-vein-size: 4
+    small-air-discard: 0.5
+    buried-veins-per-chunk: 4
+    buried-vein-size: 4
+    large-vein-chance: 0.1111      # 1 in 9 chunks
+    large-vein-size: 12
+    large-air-discard: 0.7
+    replaceable: [STONE, DEEPSLATE, TUFF, GRANITE, DIORITE, ANDESITE]
+  drops-without-silk-touch:
+    material: IRON_NUGGET
+    min: 1
+    max: 3
+    xp-min: 3
+    xp-max: 7
+  allow-placing-item: false        # ritual resource, not a building block (prevents laundering/duping)
+
+# --------------------------------------------------------------------------------------------
+#  The Lost Forge
+# --------------------------------------------------------------------------------------------
+forge:
+  auto-generate: true
+  world: ""                        # empty = first NORMAL (overworld) world
+  search-radius: 2000              # square, +/- from world spawn on X and Z
+  min-distance-from-spawn: 300
+  max-search-attempts: 60
+  arena-radius: 20                 # play area radius (blocks)
+  arena-height: 16                 # floor -> ceiling apex
+  blocks-per-tick: 5000            # build throttle
+  min-rock-cover: 8                # solid rock required above the dome
+  ambient:
+    enabled: true
+    range: 40                    # only animate when a player is this close
+    interval-ticks: 10
+  protection:
+    terrain: true
+    explosions: true
+    block-place-break: true
+    fluids: true
+    pistons: true
+    mob-griefing: true
+    fire: true
+    block-natural-spawns-in-arena: true
+
+# --------------------------------------------------------------------------------------------
+#  Ritual
+# --------------------------------------------------------------------------------------------
+ritual:
+  waves: 5
+  mobs-per-wave: 15                # exactly 15 -> 75 in total
+  retry-cooldown-minutes: 30
+  intro-seconds: 6
+  wave-transition-seconds: 7
+  reward-sequence-seconds: 9
+  spawn-interval-ticks: 6          # stagger between mob spawns within a wave
+  eligible-gamemodes: [SURVIVAL, ADVENTURE]
+  alive-poll-ticks: 20             # arena population poll (events also trigger an immediate check)
+  # Weights per mob type for each wave (index 0 = wave 1). Every wave still spawns exactly 15.
+  weights:
+    ZOMBIE:   [60, 50, 40, 32, 25]
+    SKELETON: [30, 30, 30, 28, 25]
+    CREEPER:  [10, 14, 18, 20, 22]
+    ENDERMAN: [0, 6, 12, 20, 28]
+  max-enderman-per-wave: 6
+  max-creeper-per-wave: 5
+  # Per-wave stat scaling applied through attribute modifiers on the ritual mobs:
+  health-multiplier: [1.0, 1.15, 1.3, 1.5, 1.75]
+  damage-multiplier: [1.0, 1.1, 1.2, 1.35, 1.5]
+  mob-drops: false
+  mob-xp: false
+  stall:
+    check-ticks: 100
+    teleport-after-seconds: 25     # an idle mob that has not moved is teleported next to its target
+  on-restart: INTERRUPTED          # INTERRUPTED = altar resumes the same wave for free | FAIL
+  restart-resume-needs-materials: false
+
+# --------------------------------------------------------------------------------------------
+#  Visual / audio effects
+# --------------------------------------------------------------------------------------------
+effects:
+  particle-density: 1.0            # global multiplier (0.1 .. 3.0)
+  sound-volume: 1.0
+  effect-distance: 48              # particles/sounds are only sent to players this close
+  tps-throttle:
+    enabled: true
+    below-tps: 17.0                # density is halved under this, quartered under (below-3)
+  decorative-budget-per-tick: 900  # soft cap on decorative particle spawns (essential feedback bypasses)
+  weapon-aura: true
+  swing-trail: true
+
+# --------------------------------------------------------------------------------------------
+#  Resource pack (optional; see docs/VISUAL_EFFECTS.md)
+# --------------------------------------------------------------------------------------------
+resource-pack:
+  # Leave url empty to not push anything (use server.properties or your own distribution).
+  url: ""
+  sha1: ""
+  uuid: "6f1d0c7e-3a52-4c1b-9d0e-5a7b2c4e8f10"
+  prompt: "<#b0141f>Kingdoms of Ash</#b0141f> <gray>- custom Oathbreaker, Bloodiron and armor visuals"
+  force: false
+  # Count a viewer as pack-capable once ANY pack reports SUCCESSFULLY_LOADED (used by spectral-armor AUTO)
+  accept-any-pack: true
+
+# --------------------------------------------------------------------------------------------
+#  Claim announcement  (MiniMessage; <player> is replaced with the claimant's name)
+# --------------------------------------------------------------------------------------------
+announcement:
+  enabled: true
+  title: "<dark_red><bold>☠ A LEGEND HAS AWAKENED ☠"
+  subtitle: "<red>OATHBREAKER HAS BEEN CLAIMED"
+  title-fade-in-ms: 400
+  title-stay-ms: 4500
+  title-fade-out-ms: 1200
+  line-delay-ticks: 24
+  chat:
+    - ""
+    - "<dark_red><bold>☠ A LEGEND HAS AWAKENED ☠"
+    - "<red><bold>OATHBREAKER HAS BEEN CLAIMED"
+    - "<gray>The Lost Forge has fallen. <red><bold><player></bold><gray> now wields <dark_red>Oathbreaker<gray>."
+    - "<dark_gray>The ancient blade has chosen its bearer. <red>Hunt its wielder. Claim the legend."
+    - ""
+  transfer: "<dark_red>☠ <gray>Oathbreaker has passed to <red><player><gray>."
+  fallen: "<dark_red>☠ <red><player><gray> has fallen. <dark_red>Oathbreaker<gray> lies unguarded."
+
+messages:
+  prefix: "<dark_gray>[<dark_red>Ash<dark_gray>] "

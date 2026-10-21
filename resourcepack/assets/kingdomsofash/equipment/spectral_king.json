@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "kingdomsofash:spectral_king"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "kingdomsofash:spectral_king"
+      }
+    ]
+  }
+}
